@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Memecoin Stalker</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="container">
+                <h1><i class="fas fa-chart-line"></i> Solana Memecoin Stalker</h1>
+                <nav class="nav">
+                    <button class="nav-btn active" data-tab="token-analysis">Token Analysis</button>
+                    <button class="nav-btn" data-tab="wallet-tracker">Wallet Tracker</button>
+                    <button class="nav-btn" data-tab="cross-reference">Cross Reference</button>
+                    <button class="nav-btn" data-tab="wallet-lists">Wallet Lists</button>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main">
+            <!-- Token Analysis Tab -->
+            <div class="tab-content active" id="token-analysis">
+                <div class="container">
+                    <div class="section">
+                        <h2>Token Buyer Analysis</h2>
+                        <div class="search-box">
+                            <input type="text" id="token-mint" placeholder="Enter token mint address (e.g., 7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr)" />
+                            <button id="analyze-token" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Analyze Token
+                            </button>
+                        </div>
+                        <div class="loading" id="token-loading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> Fetching buyer data...
+                        </div>
+                        <div class="results" id="token-results" style="display: none;">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="total-buyers">0</div>
+                                    <div class="stat-label">Total Buyers</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="total-volume">0 SOL</div>
+                                    <div class="stat-label">Total Volume</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="avg-buy">0 SOL</div>
+                                    <div class="stat-label">Avg Buy Size</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="time-range">-</div>
+                                    <div class="stat-label">Time Range</div>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table" id="buyers-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Wallet Address</th>
+                                            <th>Buy Amount (SOL)</th>
+                                            <th>Buy Time</th>
+                                            <th>Sell Amount (SOL)</th>
+                                            <th>Sell Time</th>
+                                            <th>PnL (Market Cap)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="buyers-tbody"></tbody>
+                                </table>
+                                <div class="bulk-actions">
+                                    <button id="add-all-buyers" class="btn btn-secondary">
+                                        <i class="fas fa-users"></i> Add All to List
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet Tracker Tab -->
+            <div class="tab-content" id="wallet-tracker">
+                <div class="container">
+                    <div class="section">
+                        <h2>Wallet Deep Dive</h2>
+                        <div class="search-box">
+                            <input type="text" id="wallet-address" placeholder="Enter wallet address" />
+                            <button id="track-wallet" class="btn btn-primary">
+                                <i class="fas fa-wallet"></i> Track Wallet
+                            </button>
+                        </div>
+                        <div class="loading" id="wallet-loading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> Fetching wallet data...
+                        </div>
+                        <div class="results" id="wallet-results" style="display: none;">
+                            <div class="wallet-info">
+                                <h3 id="wallet-address-display"></h3>
+                                <div class="stats-grid">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="wallet-trades">0</div>
+                                        <div class="stat-label">Total Trades</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="wallet-pnl">0 SOL</div>
+                                        <div class="stat-label">Total PnL</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="wallet-tokens">0</div>
+                                        <div class="stat-label">Tokens Traded</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table" id="wallet-trades-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Token</th>
+                                            <th>Action</th>
+                                            <th>Amount (SOL)</th>
+                                            <th>Market Cap at Trade</th>
+                                            <th>Timestamp</th>
+                                            <th>PnL</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="wallet-trades-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cross Reference Tab -->
+            <div class="tab-content" id="cross-reference">
+                <div class="container">
+                    <div class="section">
+                        <h2>Cross Reference Analysis</h2>
+                        <div class="cross-ref-setup">
+                            <div class="logic-selector">
+                                <label>Match Logic:</label>
+                                <select id="match-logic" class="filter-input">
+                                    <option value="and">AND - Must match ALL tokens</option>
+                                    <option value="or">OR - Must match ANY token</option>
+                                </select>
+                            </div>
+                            <div class="token-inputs" id="token-inputs">
+                                <div class="token-input-group">
+                                    <input type="text" placeholder="Token mint address 1" class="token-mint-input" />
+                                    <div class="filters">
+                                        <input type="number" placeholder="Min buy (SOL)" class="filter-input" />
+                                        <input type="datetime-local" placeholder="Before date" class="filter-input" />
+                                        <input type="number" placeholder="Min PnL (SOL)" class="filter-input" />
+                                        <select class="filter-input">
+                                            <option value="">PnL Condition</option>
+                                            <option value="gt">Greater than</option>
+                                            <option value="lt">Less than</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cross-ref-actions">
+                                <button id="add-token" class="btn btn-secondary">
+                                    <i class="fas fa-plus"></i> Add Token
+                                </button>
+                                <button id="cross-analyze" class="btn btn-primary">
+                                    <i class="fas fa-chart-network"></i> Cross Analyze
+                                </button>
+                                <button id="save-to-list" class="btn btn-secondary" style="display: none;">
+                                    <i class="fas fa-save"></i> Save to List
+                                </button>
+                            </div>
+                        </div>
+                        <div class="loading" id="cross-loading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> Cross-referencing wallets...
+                        </div>
+                        <div class="results" id="cross-results" style="display: none;">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="common-wallets">0</div>
+                                    <div class="stat-label">Common Wallets</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="overlap-percentage">0%</div>
+                                    <div class="stat-label">Overlap Rate</div>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table" id="cross-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Wallet Address</th>
+                                            <th>Tokens Matched</th>
+                                            <th>Total PnL</th>
+                                            <th>Risk Score</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cross-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet Lists Tab -->
+            <div class="tab-content" id="wallet-lists">
+                <div class="container">
+                    <div class="section">
+                        <h2>Wallet Lists Management</h2>
+                        <div class="list-controls">
+                            <input type="text" id="new-list-name" placeholder="Enter list name (e.g., 'Degen Pump Buyers')" />
+                            <button id="create-list" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Create List
+                            </button>
+                        </div>
+                        
+                        <div class="lists-grid" id="lists-grid">
+                            <!-- Wallet lists will be dynamically populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Add Wallet Modal -->
+        <div class="modal" id="add-wallet-modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add Wallet to List</h3>
+                    <button class="modal-close" onclick="app.closeModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Select List:</label>
+                        <select id="modal-list-select" class="filter-input">
+                            <option value="">Choose a list...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Wallet Address:</label>
+                        <input type="text" id="modal-wallet-address" class="filter-input" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label>Note (optional):</label>
+                        <input type="text" id="modal-wallet-note" class="filter-input" placeholder="e.g., 'Early buyer', 'Whale'..." />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="app.confirmAddWallet()">Add to List</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Cross-Reference Modal -->
+        <div class="modal" id="save-cross-modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Save Cross-Reference Results</h3>
+                    <button class="modal-close" onclick="app.closeModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>List Name:</label>
+                        <input type="text" id="modal-cross-list-name" class="filter-input" placeholder="e.g., 'Multi-Token Coordinators'" />
+                    </div>
+                    <div class="form-group">
+                        <p>This will save <span id="modal-wallet-count">0</span> wallets to a new list.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="app.confirmSaveCrossReference()">Save List</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/walletLists.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
